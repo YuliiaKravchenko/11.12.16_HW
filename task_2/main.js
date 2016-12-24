@@ -1,61 +1,32 @@
-;(function () {
-    "use strict";
- let q = prompt("Write number from 1 to 87 to choose a character");
-    let ask = Number(q);
- 
-     //console.log("ok");
-     fetch("http://swapi.co/api/people/" + ask + "/")
-        .then(res => res.json())
-        .then(function(res){
-         //console.log(res); all scope from swapi
-         let name = res.name,
-             //console.log(name);
-             species = res.species,
-             films = res.films,
-            //console.log(species);
-             getSpecies = species.map(specie => fetch(specie).then(result => result.json()));
-            //console.log(getSpecias);
-            
-         return Promise.all(getSpecies).then(res => ({name, films, species: res}));
-    })
-     
-         .then (function(res){
-         let name = res.name,
-             species = res.species,
-             films = res.films,
-             getFilms = films.map(film => fetch(film).then(result => result.json()));
-         return Promise.all(getFilms).then(res => ({name, species, films: res})); 
-    })
-     
-        .then (function(res){
-         let name = res.name,
-             species = res.species,
-             films = res.films,
-             people = res.species[0].people,
-            //console.log(people);
-            getPeople = people.map(person => fetch(person).then(result => result.json()));
-         return Promise.all(getPeople).then(res => ({name, species, films, people: res}));
-     })
-     
-        .then (function(res){
-         let name = res.name,
-             species = res.species,
-             films = res.films,
-             people = res.people;
-         
-         console.log(`
-                ${name}
-                ${films.map(film => "film: " + film.title).join("\n")}
-                ${species.map(specie => "species: " + specie.name).join("\n")}
-                ${people.map(person => "people: " + person.name).join("\n")}
-                `);
-     })
+/*Условный запрос на сервер для получения информации о состоянии рынка ценных бумаг возвращает на строку типа:
+
+apple:2016/5/27__bid_203.38-ask_203.43|2016/5/28__bid_203.35-ask_203.42|2016/5/29__bid_203.39-ask_203.45
+
+После разбора строки с помощью регулярного выражения нужно получить объект определенного вида*/
+
+let string = "apple:2016/5/27__bid_203.38-ask_203.43|2016/5/28__bid_203.35-ask_203.42|2016/5/29__bid_203.39-ask_203.45",
+    firstPart = string.match(/[a-z]+/).toString(),
+    obj = {
+        stockName: firstPart,
+        rates:[]
+    };
+
+let strParts = string.match(/([0-9]\w.+?(\||$))/g);// my option, why it not 3 parts 
+
+console.log(strParts);
+
+strParts.forEach(function(el, i , arr){
+    let date = el.match(/\d+\/+\d+\/\d+/).toString();
+    console.log(date);
+    let bid = el.match(/(bid_)+[0-9]+\.[0-9]./).toString().slice(4,10);
+    console.log(bid);
+    let ask = el.match(/(ask_)+[0-9]+\.[0-9]./).toString().slice(4,10);
+    console.log(ask);
+    obj.rates.push({date:date , bid:bid , ask:ask });
+});
     
- 
-        .catch(function(error){
-            let someError = new Error("There are no such charactor in Star War");
-            throw someError;
-        });
-         
-            
-})();
+    
+console.log(firstPart);
+console.log(obj);
+
+
